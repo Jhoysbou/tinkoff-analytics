@@ -6,6 +6,8 @@ import os
 from tinkoffapi import TinkoffApi
 
 # Токен Тиньков Инвестиций
+from utils import get_usd_course_by_date
+
 TINKOFF_TOKEN = os.getenv('TINKOFF_TOKEN')
 # Идентификатор портфеля в Тиньков инвестициях, его можно получить так:
 # tinvest.UserApi(client).accounts_get().parse_json().payload
@@ -34,8 +36,9 @@ def get_portfolio_sum(usd_course) -> int:
     return int(portfolio_sum)
 
 
-def get_sum_pay_in(usd_course) -> int:
+def get_sum_pay_in() -> int:
     """Возвращает сумму всех пополнений в рублях"""
+
     operations = api.get_all_operations(BROKER_ACCOUNT_STARTED_AT)
 
     sum_pay_in = Decimal('0')
@@ -44,13 +47,15 @@ def get_sum_pay_in(usd_course) -> int:
                 or operation.operation_type.value == "PayOut":
             payment = Decimal(str(operation.payment))
             if operation.currency.name == "usd":
-                payment *= usd_course
+                course = get_usd_course_by_date(operation.date)
+                payment *= course
             sum_pay_in += payment
     return int(sum_pay_in)
 
 
 if __name__ == "__main__":
-    portfolio_sum = get_portfolio_sum()
+    usd_course = api.get_usd_course()
+    portfolio_sum = get_portfolio_sum(usd_course)
     sum_pay_in = get_sum_pay_in()
     profit_in_rub = portfolio_sum - sum_pay_in
     profit_in_percent = 100 * round(profit_in_rub / sum_pay_in, 4)
