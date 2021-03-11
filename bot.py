@@ -19,7 +19,7 @@ ACCOUNT_ID = os.getenv("ACCOUNT_ID")
 def prepare_data() -> str:
     usd_course = api.get_usd_course()
     portfolio_sum = get_portfolio_sum(usd_course)
-    sum_pay_in = get_sum_pay_in(usd_course)
+    sum_pay_in = get_sum_pay_in()
     profit_in_rub = portfolio_sum - sum_pay_in
     profit_in_percent = 100 * round(profit_in_rub / sum_pay_in, 4)
     return f"Пополнения: {sum_pay_in:n} руб\n" \
